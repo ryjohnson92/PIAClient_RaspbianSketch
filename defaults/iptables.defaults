@@ -1,0 +1,11 @@
+sudo iptables -A INPUT -i lo -m comment --comment "loopback" -j ACCEPT
+sudo iptables -A OUTPUT -o lo -m comment --comment "loopback" -j ACCEPT
+sudo iptables -I INPUT -i eth1 -m comment --comment "In from LAN" -j ACCEPT
+sudo iptables -I OUTPUT -o tun0 -m comment --comment "Out to VPN" -j ACCEPT
+sudo iptables -A OUTPUT -o eth0 -p udp --dport 1198 -m comment --comment "openvpn" -j ACCEPT
+sudo iptables -A OUTPUT -o eth0 -p udp --dport 123 -m comment --comment "ntp" -j ACCEPT
+sudo iptables -A OUTPUT -p UDP --dport 67:68 -m comment --comment "dhcp" -j ACCEPT
+sudo iptables -A OUTPUT -o eth0 -p udp --dport 53 -m comment --comment "dns" -j ACCEPT
+sudo iptables -A FORWARD -i tun0 -o eth1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+sudo iptables -A FORWARD -i eth1 -o tun0 -m comment --comment "LAN out to VPN" -j ACCEPT
+sudo iptables -t nat -A POSTROUTING -o tun0 -j MASQUERADE
